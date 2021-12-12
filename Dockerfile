@@ -6,7 +6,7 @@ WORKDIR /
 RUN git clone --depth 1 --branch v1.8.6 https://github.com/coredns/coredns
 COPY . /coredns-plugin-hijacking
 RUN ln -s /coredns-plugin-hijacking/hijacking /coredns/plugin/hijacking
-RUN sed -i 's/^log:log/log:log\nhijacking:hijacking/g' coredns/plugin.cfg
+RUN sed -i 's/^forward:forward/hijacking:hijacking\nforward:forward/g' coredns/plugin.cfg
 RUN cd coredns && make
 
 FROM debian:stable-slim AS certs
