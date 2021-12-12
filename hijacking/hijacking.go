@@ -17,17 +17,25 @@ const (
 	TypeA DNSRecordType = "A"
 )
 
+const domainWildcard = "*"
+
+// TODO: support multi domain/subdomain
+
 type Hijacking struct {
-	Next       plugin.Handler
-	Zone       string
-	RecordType DNSRecordType
-	Records    []net.IP
+	Next    plugin.Handler
+	Zone    string
+	Records []net.IP
 }
 
 // ServeDNS implements the plugin.Handler interface.
 func (it Hijacking) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
 	state := request.Request{W: w, Req: r}
 	if matched := plugin.Zones([]string{it.Zone}).Matches(state.Name()); matched == "" {
+		return plugin.NextOrFailure(it.Name(), it.Next, ctx, w, r)
+	}
+
+	// TODO: support other type
+	if state.Type() != dns.Type(dns.TypeA).String() {
 		return plugin.NextOrFailure(it.Name(), it.Next, ctx, w, r)
 	}
 

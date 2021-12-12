@@ -7,21 +7,29 @@ import (
 	clog "github.com/coredns/coredns/plugin/pkg/log"
 )
 
-var log = clog.NewWithPlugin("hihacking")
+type Directive string
+
+const (
+	DirectiveRecord Directive = "record"
+)
+
+var log = clog.NewWithPlugin(name)
 
 func init() { plugin.Register(name, setup) }
 
 func setup(c *caddy.Controller) error {
+	ips, err := parseConfig(c)
+	if err != nil {
+		return err
+	}
 	config := dnsserver.GetConfig(c)
-
-	remainingArgs := c.RemainingArgs()
-	log.Info(remainingArgs)
-
 	config.AddPlugin(func(next plugin.Handler) plugin.Handler {
-		return Hijacking{
-			Next: next,
-			Zone: config.Zone,
+		hijacking := Hijacking{
+			Next:    next,
+			Zone:    config.Zone,
+			Records: ips,
 		}
+		return hijacking
 	})
 
 	return nil
