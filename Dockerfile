@@ -4,7 +4,7 @@ FROM golang:1.17 AS build-env
 ENV GO111MODULE on
 WORKDIR /
 RUN git clone --depth 1 --branch v1.8.6 https://github.com/coredns/coredns
-RUN git clone --depth 1 https://github.com/strrl/coredns-plugin-hijacking
+COPY . /coredns-plugin-hijacking
 RUN ln -s /coredns-plugin-hijacking/hijacking /coredns/plugin/hijacking
 RUN sed -i 's/^log:log/log:log\nhijacking:hijacking/g' coredns/plugin.cfg
 RUN cd coredns && make
